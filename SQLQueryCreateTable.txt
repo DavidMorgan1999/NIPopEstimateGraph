@@ -1,0 +1,13 @@
+use nipopulationdata;
+
+CREATE TABLE info
+(
+id int NOT NULL AUTO_INCREMENT,
+Geo_name varchar(100) NOT NULL,
+Geo_code char(9) NOT NULL,
+Year char(4) NOT NULL,
+Gender varchar(11) NOT NULL,
+Age varchar(2) NOT NULL,
+Population_Estimate varchar(10) NOT NULL,
+PRIMARY KEY (id)
+);

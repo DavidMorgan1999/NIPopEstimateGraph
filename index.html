@@ -1,0 +1,189 @@
+﻿<html>
+  <head>
+  <title>100438521 Application Development Assignment</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- <script src="Scripts/webservice.js"</script> -->
+    <script src="Scripts/jquery-1.10.2.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/Site.css" rel="stylesheet" />
+    <script src="Scripts/modernizr-2.6.2.js"></script>
+	<!-- this calls the google charts scripts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+google.charts.load('current', {'packages':['line']});
+  
+//This function finds with information has been input in the form and tests they are all in the correct format to be used by the drawChart function  
+	 function getInfo()
+	 {
+	 
+	 //Alert below to test getInfo gets called
+	 //alert("Get info");
+	 
+	 
+	 //Radio buttons
+	 var maleChecked = document.getElementById("male").checked;
+	 var femaleChecked = document.getElementById("female").checked;
+	 var otherChecked = document.getElementById("other").checked;
+	 //Textbox
+	 var ageValue = document.getElementById("Age").value;
+	 var ErrorMsg = "Error: ";
+	 
+	 var genderValue = "None";
+	 var submit = "true";
+	 
+	 //Checks which radio button is checked and gives its value to genderValue.
+	 if(maleChecked == true){
+	 genderValue = "Males";
+	 }
+	 
+	 if(femaleChecked == true){
+	 genderValue = "Females";
+	 }
+	 	 
+	 if(otherChecked == true){
+	 genderValue = "AllPersons";
+	 }
+
+	//Error checking for gender inputs
+	if(genderValue == "None"){
+	ErrorMsg += "No gender has been selected" + "<br>";
+	submit = "false";
+	}
+	
+	//Error checking for age inputs
+	if(ageValue == ""){
+		ErrorMsg += "No age has been input" + "<br>";
+	submit = "false";
+	} else {
+	if(isNaN(ageValue)){
+			ErrorMsg += "Age must be input as a number" + "<br>";
+			submit = "false";
+		} else {
+			if(ageValue < 0 || ageValue > 90){
+			ErrorMsg += "Information is only available for ages 0-90" + "<br>";
+			submit = "false"; 
+			}
+	}
+	}
+	
+	//Alert below used for testing.
+	//alert(ageValue + genderValue + submit + '\n' + ErrorMsg);
+	
+	if (submit == "false"){
+	 document.getElementById('lblError').innerHTML = ErrorMsg;
+
+	}else {
+	
+	//Unsure why this stops drawChart being called.
+	 //document.getElementById('lblError').innerHTML = "";
+	 
+	 drawChart(ageValue,genderValue);
+	}
+
+	}
+
+//Uses Ajax to populate the google charts datatable from the correct URL and draws the graph on the web page
+ function drawChart(age,gender) {
+//Alert below used for testing.
+//alert(age + gender);
+
+//Ajax to get json data 
+$.ajax({
+		url: '/info/' + gender + '/' + age,
+		type: 'GET',
+		cache: false,
+		dataType: 'json',
+		success: function (response) {
+
+			var data = new google.visualization.DataTable();
+			//Declares data that will be displayed on the graph.
+      data.addColumn('string', 'Year');
+      data.addColumn('number', gender + ' aged ' + age);
+    	var arr = [];
+		
+		//Fills array with useable information from each object from the ajax response
+$.each(response, function (index, value) 
+    {    
+	
+      arr.push([value.Year, Number(value.PopEstimate)]);
+	  
+});
+
+//Adds all data required into the google charts data table.
+data.addRows(arr);
+
+//Declares options for the graphs display
+      var options = {
+        chart: {
+          title: 'Northern Ireland Population Estimate',
+          curveType: 'function'
+        },
+        width: 900,
+        height: 500
+      };
+
+//Gets html element where the graph will be drawn.
+      var chart = new google.charts.Line(document.getElementById('curve_chart'));
+
+//Draws the graph
+      chart.draw(data, google.charts.Line.convertOptions(options));
+		},
+		 error: function (jqXHR, textStatus, errorThrown) {
+            alert(jqXHR + '\n' + textStatus + '\n' + errorThrown);
+        }
+    });
+	
+      
+    }
+
+
+</script>
+
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">Assignment 2</a>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        <div class="row">
+            <div class="col-md-12">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+			 <label for="Age">Input Age:</label>
+  <input type="text" id="Age" name="Age"> &nbsp; &nbsp; &nbsp;
+  <input type="radio" id="male" name="gender" value="Males">
+  <label for="male">Male</label> &nbsp; &nbsp; &nbsp;
+  <input type="radio" id="female" name="gender" value="Females">
+  <label for="female">Female</label> &nbsp; &nbsp; &nbsp;
+  <input type="radio" id="other" name="gender" value="AllPersons">
+  <label for="other">All Persons</label> &nbsp;
+  <input type="button" value="Create Chart" class="btn btn-sm btn-primary" onclick="getInfo();" />
+            </div>
+			<label style="color:#FF0000"; id="lblError"></label>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                &nbsp;
+            </div>
+        </div>
+        
+		<div id="curve_chart"></div>
+
+        <footer>
+            <p>2020 - 100438521</p>
+        </footer>
+    </div>
+    
+    
+  </body>
+</html>
